@@ -1,57 +1,75 @@
-// import React from 'react'
-// import { useState } from 'react';
-// import { useDispatch } from 'react-redux';
-// import '../내가만든css/loginpage.css';
+import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import peoplesData from '../db/data.json'; 
+import style from '../내가만든css/loginpage.module.css';
 
-// const Loginpage = () => {
-//     const dispatch = useDispatch();
+const Loginpage = () => {
+    const navigate = useNavigate();
+    const IDRef = useRef(null);
+    const pwdRef = useRef(null);
 
-//     const [Email, setEmail] = useState("");
-//     const [Password, setPassword] = useState("");
-    
-//     const onEmailHandler = (event) => {
-//         setEmail(event.currentTarget.value);
-//     }
+    const onSubmitRegister = () => {
+        navigate('/registerpage1');
+    }
 
-//     const onPasswordHandler = (event) => {
-//         setPassword(event.currentTarget.value);
-//     }
+    const onSubmit = (e) => {
+        e.preventDefault();
 
-//     const onSubmitHandler = (event) => {
-//         event.preventDefault();
-//         let body = {
-//             email : Email,
-//             password : Password,
-//         }
-//     }
+        if (!IDRef.current.value || !pwdRef.current.value) {
+            alert("모든 입력칸에 값을 입력해주세요.");
+            return;
+        }
 
-//     dispatch(loginUser(body));
+        const emailPattern = /\S+@\S+\.\S+/;
+        if (!emailPattern.test(IDRef.current.value)) {
+            alert("올바른 이메일 주소를 입력해주세요.");
+            IDRef.current.focus();
+            return;
+        }
 
-//     return (
-//         <>
-//             <h1 className='header_logo'>
-//                 <a href="/">
-//                     <span>MOTIV</span>
-//                 </a>
-//             </h1>
-//             <div style={{ 
-//                 display: 'flex', justifyContent: 'center', alignItems: 'center', 
-//                 width: '100%', height: '100vh'
-//                 }}>
-//                 <form style={{ display: 'flex', flexDirection: 'column'}}
-//                 >
-//                     <label>Email</label>
-//                     <input type='email'/>
-//                     <label>Password</label>
-//                     <input type='password'/>
-//                     <br />
-//                     <button formAction=''>
-//                         Login
-//                     </button>
-//                 </form>
-//             </div>
-//         </>
-//     )
-// }
+        const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}$/;
+        if (!passwordPattern.test(pwdRef.current.value)) {
+            alert("패스워드는 영어, 숫자, 특수문자를 포함한 6~20자 이내로 입력해주세요.");
+            pwdRef.current.focus();
+            return;
+        }
 
-// export default Loginpage
+        const user = peoplesData.peoples.find(person => person.ID === IDRef.current.value && person.pwd === pwdRef.current.value);
+
+        if (user) {
+            alert("로그인 성공!");
+            localStorage.setItem('user', JSON.stringify(user)); 
+            navigate('/');
+        } else {
+            alert("이메일 주소 또는 비밀번호가 올바르지 않습니다.");
+        }
+    }
+
+    return (
+        <>
+            <h1 className='header_logo'>
+                <a href="/">
+                    <span>MOTIV</span>
+                </a>
+            </h1>
+            <div style={{ 
+                display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                width: '100%', height: '100vh'
+                }}>
+                <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={onSubmit}>
+                    <label>Email</label>
+                    <input type="text" placeholder="com@example.co.kr" ref={IDRef} />
+                    <label>Password</label>
+                    <input type="password" placeholder="*********" ref={pwdRef} />
+                    <br />
+                    <button type="submit">로그인</button>
+                </form>
+                <div>
+                    <button onClick={onSubmitRegister}>회원가입 하러가기</button>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default Loginpage;
